@@ -35,13 +35,24 @@ namespace :data do
     sleep(2)
     lazy_load(browser)
 
-    #Start loop for all pages
+    #Start loop for all pages - missing last page of results, but that's fine for now
     last_page = false
     while last_page == false
       full_source = browser.body
       doc = Nokogiri::HTML(full_source)
       byebug
       images = doc.css('.items')
+      images.each do |image|
+        Image.create(page_url: image.children[1].attribute('href').value)
+      end
+      browser.find(:css, '.next_page').click
+      sleep(2)
+      lazy_load(browser)
+      if browser.has_css?('a.next_page')
+        nil
+      else
+        last_page = true
+      end
     end
 
   end
